@@ -3,32 +3,32 @@ __author__ = 'Blake'
 import os
 import subprocess
 
-def batch_restart(conf):
+def batch_restart(conf, cwd = os.getcwd()):
     ins = '''
-taskkill /im btsync.exe /f
-{btsync_path} /config {btsync_conf_path}'''.format(
-        btsync_path = os.path.join(os.getcwd(), conf('polly.btsync_path', '')),
-        btsync_conf_path = os.path.join(os.getcwd(), conf('polly.btsync_conf_path', '')))
+tasklist /fi "imagename eq btsync.exe" | find ":" > nul
+if errorlevel 1 taskkill /f /im "btsync.exe"
+{btsync_path} /config {btsync_conf_path}'''.strip().format(
+        btsync_path = conf('polly.btsync_path', ''),
+        btsync_conf_path = conf('polly.btsync_conf_path', ''))
 
     batch_file = os.path.join(os.getcwd(), 'scripts', 'btsync.bat')
     with open(batch_file, 'w') as f:
         f.write(ins)
 
-    outs = subprocess.call([batch_file], shell=False)
-    print outs, batch_file
-
-    return True if outs == 0 else batch_file
+    proc = subprocess.Popen(batch_file, cwd=cwd, shell=False)
+    out, err = proc.communicate()
+    return True if not err else batch_file
 
 def shell_restart(conf):
     raise NotImplementedError('needs linux implementation in polly/utils.py')
 
-def force_btsync_restart(conf):
+def force_btsync_restart(conf, cwd):
     if 'nt' in os.name:
         fn = batch_restart
     else:
         fn = shell_restart
 
-    ret = fn(conf)
+    ret = fn(conf, cwd)
 
     if ret is True:
         return True
