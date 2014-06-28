@@ -1,3 +1,3 @@
-
-taskkill /im btsync.exe /f
-F:\btsync\projects\polly\bin/btsync/btsync.exe /config F:\btsync\projects\polly\btsync.conf
+tasklist /fi "imagename eq btsync.exe" | find ":" > nul
+if errorlevel 1 taskkill /f /im "btsync.exe"
+.\\bin\\btsync\\btsync.exe /config btsync.conf
