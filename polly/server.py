@@ -1,28 +1,43 @@
 __author__ = 'Blake VandeMerwe'
 import os
-import sys
 import functools
+from gevent import monkey; monkey.patch_all()
+import time
 from bottle import Bottle, run, static_file
 from bottle import jinja2_view
 from bottle_sqlite import SQLitePlugin
 
-app = Bottle()
-app.config.load_config(os.path.join(os.getcwd(), 'polly.conf'))
-app.install(SQLitePlugin(dbfile=app.config.get('sqlite.db', ':memory:')))
+config_file = os.path.join(os.getcwd(), 'polly.conf')
 
-view = functools.partial(jinja2_view, template_lookup=[app.config.get('polly.template_dir', './templates')])
+if not os.path.exists(config_file):
+    raise ImportError('Could not find polly.conf file!')
+
+app = Bottle()
+app.config.load_config(config_file)
+
+conf = lambda x, y: app.config.get(x, y)
+view = functools.partial(jinja2_view, template_lookup=[conf('polly.template_dir', './templates')])
+
+app.install(SQLitePlugin(dbfile=conf('sqlite.db', ':memory:')))
 
 @app.route('/')
 @view('default.html')
 def index():
-    return {'path': app.config.get('polly.template_dir', None)}
+    return {'path': conf('polly.template_dir', None)}
+
+@app.get('/api/dirs')
+def callback():
+    for root, dirs, files in os.walk(r'F:\btsync\projects\polly', followlinks = conf('polly.allow_symlinks')):
+        for name in files:
+            yield name + '<br>'
 
 @app.route('/static/<path:path>', name='static')
 def callback(path):
     return static_file(path, root='static')
 
 run(app,
-    debug = app.config.get('debug', True),
-    host = app.config.get('host', 'localhost'),
-    port = app.config.get('port', 8080),
-    reloader = app.config.get('reloader', app.config.get('debug', True)))
+    debug = conf('debug', True),
+    host = conf('host', 'localhost'),
+    port = conf('port', 8080),
+    server = conf('server', 'wsgiref'),
+    reloader = conf('reloader', conf('debug', True)))
