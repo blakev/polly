@@ -48,15 +48,13 @@ def serve_static(filename):
     return static_file(filename, root=os.path.join(cwd, conf('polly.statics_dir', './static')))
 
 if __name__ == '__main__':
-    utils.force_btsync_restart(conf)
-
-    # app.mount('/api/', pollyApi)
-    # if utils.force_btsync_restart(conf):
-    #     run(app,
-    #         debug = conf('debug', True),
-    #         host = conf('host', 'localhost'),
-    #         port = conf('port', 8080),
-    #         server = conf('server', 'wsgiref'),
-    #         reloader = conf('reloader', conf('debug', True)))
-    # else:
-    #     sys.exit(1)
+    app.mount('/api/', pollyApi)
+    if utils.force_btsync_restart(conf):
+        run(app,
+            debug = conf('debug', True),
+            host = conf('host', 'localhost'),
+            port = conf('port', 8080),
+            server = conf('server', 'wsgiref'),
+            reloader = conf('reloader', conf('debug', True)))
+    else:
+        sys.exit(1)
