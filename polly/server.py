@@ -2,12 +2,14 @@ __author__ = 'Blake VandeMerwe'
 import os
 import functools
 from gevent import monkey; monkey.patch_all()
-import time
 from bottle import Bottle, run, static_file
-from bottle import jinja2_view
+from bottle import jinja2_view, jinja2_template as template
 from bottle_sqlite import SQLitePlugin
 
-config_file = os.path.join(os.getcwd(), 'polly.conf')
+from routes.api import api as pollyApi
+
+cwd = os.getcwd()
+config_file = os.path.join(cwd, 'polly.conf')
 
 if not os.path.exists(config_file):
     raise ImportError('Could not find polly.conf file!')
@@ -25,19 +27,15 @@ app.install(SQLitePlugin(dbfile=conf('sqlite.db', ':memory:')))
 def index():
     return {'path': conf('polly.template_dir', None)}
 
-@app.get('/api/dirs')
-def callback():
-    for root, dirs, files in os.walk(r'F:\btsync\projects\polly', followlinks = conf('polly.allow_symlinks')):
-        for name in files:
-            yield name + '<br>'
+@app.route('/static/<filename:path>', name='static')
+def serve_static(filename):
+    return static_file(filename, root=os.path.join(cwd, conf('polly.statics_dir', './static')))
 
-@app.route('/static/<path:path>', name='static')
-def callback(path):
-    return static_file(path, root='static')
-
-run(app,
-    debug = conf('debug', True),
-    host = conf('host', 'localhost'),
-    port = conf('port', 8080),
-    server = conf('server', 'wsgiref'),
-    reloader = conf('reloader', conf('debug', True)))
+if __name__ == '__main__':
+    app.mount('/api/', pollyApi)
+    run(app,
+        debug = conf('debug', True),
+        host = conf('host', 'localhost'),
+        port = conf('port', 8080),
+        server = conf('server', 'wsgiref'),
+        reloader = conf('reloader', conf('debug', True)))
