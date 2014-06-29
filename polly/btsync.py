@@ -113,9 +113,3 @@ class BtsyncApi(object):
     def shutdown(self):
         msg = self.get(self.bturl + 'shutdown')
         return True if msg['error'] == 0 else msg
-
-
-sync = BtsyncApi(r'../btsync.conf')
-print sync.connected
-print sync.get_version()
-print sync.get_secrets()
