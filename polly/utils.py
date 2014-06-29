@@ -3,6 +3,14 @@ __author__ = 'Blake'
 import os
 import subprocess
 
+
+
+
+def conf(app):
+    def inner(x, y = ''):
+        return app.config.get(x, y)
+    return inner
+
 def batch_restart(conf, cwd = os.getcwd()):
     ins = '''
 tasklist /fi "imagename eq btsync.exe" | find ":" > nul

@@ -3,45 +3,43 @@
     <title>
         Polly
     </title>
-        <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
-
+    <meta name="viewport" content="width=device-width,initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="/static/css/gumby.css">
     <link rel="stylesheet" href="/static/css/style.css">
-
+    <script src="/static/js/modernizr.custom.02457.js"></script>
+    <script src="/static/js/socket.io.js"></script>
 </head>
+
 <body>
-
-<div class="row navbar pretty" id="nav1">
-  <!-- Toggle for mobile navigation, targeting the <ul> -->
-  <a class="toggle" gumby-trigger="#nav1 > ul" href="#"><i class="icon-menu"></i></a>
-  <h1 class="four columns logo">
-    <a href="#">
-      <img src="/img/gumby_mainlogo.png" gumby-retina />
-    </a>
-  </h1>
-  <ul class="eight columns">
-    <li><a href="#">Features</a></li>
-    <li>
-      <a href="#">Documentation</a>
-      <div class="dropdown">
-        <ul>
-          <li><a href="#">The Grid</a></li>
-          <li><a href="#">UI Kit</a></li>
-          <li><a href="#">Sass</a></li>
-          <li><a href="#">JavaScript</a></li>
-          <li><a href="#">Demo</a></li>
-        </ul>
-      </div>
-    </li>
-    <li><a href="#">Customize</a></li>
-  </ul>
-</div>
+    Server: <span id="conn_status">connecting...</span> | Btsync: <span id="bt_conn_status">connection...</span>
+    <br><br>
+    <div id="data"></div>
 
 
-<script src="/static/js/gumby.min.js"></script>
+    <script src="/static/js/jquery-1.11.1.min.js"></script>
+    <script src="/static/js/gumby.min.js"></script>
+    <script src="/static/js/knockout-3.1.0.debug.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            var socket = io.connect('/status');
+            // -----------------------------
+            socket.on('message', function(data) {
+                $('#data').text(data.status + ', ' + data.time + ', ' + data.sync_stats);
+            })
+
+            // -----------------------------
+            socket.on('connect', function(socket) {
+                $('#conn_status').html('Connected');
+            });
+
+            socket.on('error', function(socket) {
+                $('#conn_status').html('Error');
+            });
+
+            socket.on('disconnect', function(socket) {
+                $('#conn_status').html('disconnected');
+            });
+        })
+    </script>
 </body>
 </html>
-
-THIS IS THE DEFAULT PAGE
-<br>
-{{ path }}
