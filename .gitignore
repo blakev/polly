@@ -1,4 +1,5 @@
-btsync.conf
+*.conf
+_old/*
 
 # PyCharm Stuffs
 .idea/*
