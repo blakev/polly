@@ -1,5 +1,9 @@
 *.conf
 _old/*
+BTSYNC_KEY
+scratch.*
+skratch.*
+derp.*
 
 # PyCharm Stuffs
 .idea/*
